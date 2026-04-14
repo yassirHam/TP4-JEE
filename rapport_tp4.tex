@@ -1,0 +1,819 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel} 
+\usepackage{mathpazo} 
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{eso-pic}
+\usepackage{parskip}
+\usepackage{listings}
+\usepackage{caption}
+
+\definecolor{ensahblue}{RGB}{13, 71, 161}
+\definecolor{ensahgreen}{RGB}{27, 94, 32}
+\definecolor{codegray}{RGB}{245,245,245}
+\definecolor{codestring}{RGB}{27,94,32}
+\definecolor{codekeyword}{RGB}{13,71,161}
+
+\hypersetup{colorlinks=true, linkcolor=ensahblue, urlcolor=ensahblue}
+
+\lstdefinestyle{javastyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{gray}\itshape,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    showstringspaces=false,
+    tabsize=2
+}
+\lstdefinestyle{jspstyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\footnotesize,
+    language=HTML,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{gray}\itshape,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    showstringspaces=false,
+    tabsize=2
+}
+\lstdefinestyle{xmlstyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\footnotesize,
+    language=XML,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{gray}\itshape,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    showstringspaces=false,
+    tabsize=2
+}
+
+\AddToShipoutPictureBG{
+\begin{tikzpicture}[remember picture, overlay]
+\draw[line width=2pt, ensahblue] (current page.south west) ++(1.5cm,1.5cm) rectangle ([xshift=-1.5cm,yshift=-1.5cm]current page.north east);
+\draw[line width=1pt, ensahgreen] (current page.south west) ++(1.65cm,1.65cm) rectangle ([xshift=-1.65cm,yshift=-1.65cm]current page.north east);
+\end{tikzpicture}
+}
+
+\titleformat{\section}{\color{ensahblue}\Large\bfseries}{\thesection}{1em}{}[{\color{ensahblue}\titlerule[1pt]}]
+\titleformat{\subsection}{\color{ensahgreen}\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\color{black}\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+% ------ PAGE DE GARDE ------
+\begin{titlepage}
+    \linespread{1.2}\selectfont
+    \begin{center}
+        \vspace*{0.2cm}
+        \includegraphics[width=0.4\textwidth]{t1.png}
+        \vspace{1cm}
+        {\LARGE \color{ensahblue} \textbf{École Nationale des Sciences Appliquées d'Al Hoceima} \par}
+        \vspace{0.5cm}
+        {\Large \color{ensahgreen} \textbf{Filière : TDIA -- 2\textsuperscript{ème} Année} \par}
+        \vspace{1.5cm}
+        \begin{tikzpicture}
+        \node[fill=ensahblue!10, rounded corners=12pt, inner sep=20pt, align=center, text width=0.8\textwidth, draw=ensahblue, line width=1pt] {
+            {\Huge \color{ensahblue} \textbf{Rapport TP -- JEE MVC1}} \\[12pt]
+            {\Large \color{black} Gestion des Produits avec Authentification et Gestion des Rôles}
+        };
+        \end{tikzpicture}
+        \vspace{1.5cm}
+        \begin{minipage}[t]{0.45\textwidth}
+            \begin{flushleft}
+                \Large \textbf{Réalisé par :}\\
+                \vspace{0.2cm}
+                \textbf{\color{ensahblue} Yassir HAMRI}
+            \end{flushleft}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.45\textwidth}
+            \begin{flushright}
+                \Large \textbf{Encadré par :}\\
+                \vspace{0.2cm}
+                \textbf{Pr. Mohamed CHERRADI}
+            \end{flushright}
+        \end{minipage}
+        \vfill
+        {\large \textbf{Année Universitaire : 2025/2026} \par}
+        \vspace*{0.5cm}
+    \end{center}
+\end{titlepage}
+\stepcounter{page}
+
+\tableofcontents
+\newpage
+
+% =============================================
+\section{Introduction et Structure du Projet}
+% =============================================
+
+Ce projet consiste à développer une application web dynamique de gestion de produits, reposant sur l'architecture \textbf{MVC1} (une servlet par action) et le modèle \textbf{3-Tiers}. Pour le TP4, le système a été complété par un mécanisme d'authentification, une gestion de rôles (Admin / Utilisateur), un filtre de sécurité, et une gestion centralisée des erreurs.
+
+Le choix a été fait d'utiliser les \textbf{annotations} \texttt{@WebServlet} et \texttt{@WebFilter} plutôt qu'une déclaration exhaustive dans \texttt{web.xml}, afin de garder la configuration au plus proche du code concerné.
+
+\subsection{Arborescence du Projet}
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, frame=none, backgroundcolor=\color{white}]
+src/main
+|-- java
+|   |-- dao
+|   |   |-- Produit.java         (Entite produit)
+|   |   |-- produitDAO.java      (Interface DAO produit)
+|   |   |-- produitImpl.java     (Implementation DAO + donnees initiales)
+|   |   |-- user.java            (Entite utilisateur avec role)
+|   |   `-- userDAO.java         (Verification des identifiants)
+|   |-- services
+|   |   |-- produitMetier.java   (Interface service)
+|   |   `-- produitMetierImpl.java (Singleton - couche service)
+|   |-- filter
+|   |   `-- AuthFilter.java      (Filtre de securite)
+|   `-- web
+|       |-- AddProduitServlet.java
+|       |-- DeleteProduitServlet.java
+|       |-- EditProduitServlet.java
+|       |-- UpdateProduitServlet.java
+|       |-- ListProduitServlet.java
+|       |-- loginServlet.java
+|       `-- logoutServlet.java
+`-- webapp
+    |-- index.jsp      (Vue Admin - CRUD complet)
+    |-- list.jsp       (Vue User - lecture seule)
+    |-- login.jsp      (Formulaire de connexion)
+    |-- error.jsp      (Page d'erreur)
+    `-- WEB-INF
+        `-- web.xml
+\end{lstlisting}
+
+% =============================================
+\section{Couche DAO -- Modèles et Accès aux Données}
+% =============================================
+
+\subsection{Produit.java -- L'entité principale}
+
+La classe \texttt{Produit} est le modèle central. Elle suit la convention \textbf{Java Bean} : attributs privés et accès via des getters/setters publics. Cette convention est indispensable pour l'Expression Language (EL) des JSP, car \texttt{\$\{p.nom\}} appelle automatiquement \texttt{p.getNom()}.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=dao/Produit.java]
+package dao;
+
+public class Produit {
+    private Long idProduit;
+    private String nom;
+    private String description;
+    private Double prix;
+
+    public Produit() {}
+    public Produit(String nom, String s, Double p) {
+        this.nom = nom;
+        this.description = s;
+        this.prix = p;
+    }
+    public Long getIdProduit() { return idProduit; }
+    public void setIdProduit(Long idProduit) { this.idProduit = idProduit; }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Double getPrix() { return prix; }
+    public void setPrix(Double prix) { this.prix = prix; }
+}
+\end{lstlisting}
+
+\subsection{produitDAO.java -- L'interface du contrat}
+
+L'interface \texttt{produitDAO} définit le contrat que toute implémentation doit respecter. Ce principe garantit un \textbf{couplage faible} : la couche service ne connaît que l'interface, pas l'implémentation concrète.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=dao/produitDAO.java]
+package dao;
+import java.util.*;
+
+public interface produitDAO {
+    public void addProduit(Produit p);
+    public void deleteProduit(Long id);
+    public void editProduit(Produit p);
+    public void updateProduit(Produit p);
+    public List<Produit> getAllProduits();
+    public Produit getProduitById(Long ID);
+}
+\end{lstlisting}
+
+\subsection{produitImpl.java -- Implémentation en mémoire}
+
+\texttt{produitImpl} est l'implémentation concrète de l'interface DAO. Elle utilise une \texttt{ArrayList} en mémoire. La méthode \texttt{init()} est appelée une seule fois au démarrage pour pré-charger deux produits par défaut.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=dao/produitImpl.java]
+package dao;
+import java.util.*;
+
+public class produitImpl implements produitDAO {
+    private List<Produit> products = new ArrayList<>();
+
+    public void init() {
+        addProduit(new Produit("PC 1", "Sony vaio 1", 7000.0));
+        addProduit(new Produit("PC 2", "Sony vaio 2", 6000.0));
+    }
+    public void addProduit(Produit p) {
+        p.setIdProduit(new Long(products.size() + 1));
+        products.add(p);
+    }
+    public void deleteProduit(Long id) {
+        products.remove(getProduitById(id));
+    }
+    public Produit getProduitById(Long id) {
+        for (Produit p : products) {
+            if (p.getIdProduit().equals(id)) return p;
+        }
+        return null;
+    }
+    public List<Produit> getAllProduits() { return products; }
+    public void updateProduit(Produit p) {
+        for (int i = 0; i < products.size(); i++) {
+            Produit ep = products.get(i);
+            if (ep.getIdProduit().equals(p.getIdProduit())) {
+                ep.setNom(p.getNom());
+                ep.setDescription(p.getDescription());
+                ep.setPrix(p.getPrix());
+                break;
+            }
+        }
+    }
+    @Override
+    public void editProduit(Produit p) {}
+}
+\end{lstlisting}
+
+\subsection{user.java -- Le modèle utilisateur}
+
+La classe \texttt{user} représente un compte applicatif. Elle contient trois champs : \texttt{login}, \texttt{password} et \texttt{role}. Le \texttt{role} déterminera quelle interface sera présentée après la connexion.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=dao/user.java]
+package dao;
+
+public class user {
+    private String login;
+    private String password;
+    private String role;
+
+    public user() {}
+    public user(String login, String password, String role) {
+        this.login = login;
+        this.password = password;
+        this.role = role;
+    }
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+}
+\end{lstlisting}
+
+\subsection{userDAO.java -- La gestion des comptes}
+
+\texttt{userDAO} dispose d'une liste \texttt{static} d'utilisateurs initialisée dans un bloc \texttt{static\{\}}. Ce bloc s'exécute une seule fois au chargement de la classe, permettant de pré-enregistrer un administrateur et un utilisateur standard.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=dao/userDAO.java]
+package dao;
+import java.util.*;
+
+public class userDAO {
+    private static List<user> users = new ArrayList<>();
+
+    static {
+        users.add(new user("admin", "1234", "admin"));
+        users.add(new user("user",  "1234", "user"));
+    }
+
+    public user findByLoginAndPassword(String login, String password) {
+        for (user u : users) {
+            if (u.getLogin().equals(login) && u.getPassword().equals(password)) {
+                return u;
+            }
+        }
+        return null;
+    }
+}
+\end{lstlisting}
+
+% =============================================
+\section{Couche Service}
+% =============================================
+
+\subsection{produitMetier.java -- L'interface métier}
+
+La couche service joue le rôle d'intermédiaire entre les servlets et le DAO. L'interface \texttt{produitMetier} expose exactement les mêmes opérations que le DAO, renforçant l'indépendance des couches.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=services/produitMetier.java]
+package services;
+import dao.*;
+import java.util.*;
+
+public interface produitMetier {
+    public void addProduit(Produit p);
+    public void deleteProduit(Long id);
+    public void editProduit(Produit p);
+    public void updateProduit(Produit p);
+    public List<Produit> getAllProduits();
+    public Produit getProduitById(Long ID);
+}
+\end{lstlisting}
+
+\subsection{produitMetierImpl.java -- Le Singleton}
+
+L'implémentation est réalisée selon le \textbf{patron de conception Singleton} : une seule instance de la classe est créée et partagée entre toutes les servlets. Ceci est crucial pour que toutes les servlets opèrent sur la \emph{même} liste de produits en mémoire. La méthode \texttt{getInstance()} crée l'instance seulement si elle n'existe pas encore.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=services/produitMetierImpl.java]
+package services;
+import dao.*;
+import java.util.*;
+
+public class produitMetierImpl implements produitMetier {
+    public static produitMetierImpl instance;
+    private produitDAO dao;
+
+    private produitMetierImpl() {
+        dao = new produitImpl();
+        ((produitImpl) dao).init(); // Charge les produits par defaut
+    }
+
+    public static produitMetierImpl getInstance() {
+        if (instance == null) {
+            instance = new produitMetierImpl();
+        }
+        return instance;
+    }
+
+    @Override public void addProduit(Produit p)        { dao.addProduit(p); }
+    @Override public void deleteProduit(Long id)       { dao.deleteProduit(id); }
+    @Override public void editProduit(Produit p)       { dao.editProduit(p); }
+    @Override public void updateProduit(Produit p)     { dao.updateProduit(p); }
+    @Override public List<Produit> getAllProduits()     { return dao.getAllProduits(); }
+    @Override public Produit getProduitById(Long ID)   { return dao.getProduitById(ID); }
+}
+\end{lstlisting}
+
+% =============================================
+\section{Couche Web -- Les Servlets CRUD}
+% =============================================
+
+Chaque servlet est responsable d'une unique opération, conformément au principe MVC1. Toutes utilisent l'annotation \texttt{@WebServlet} pour se déclarer sans passer par le \texttt{web.xml}.
+
+\subsection{AddProduitServlet.java}
+
+Traite la soumission du formulaire d'ajout via \texttt{doPost}. Les paramètres du formulaire sont récupérés avec \texttt{request.getParameter()}, puis un objet \texttt{Produit} est construit et transmis au service.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/AddProduitServlet.java]
+@WebServlet("/addProduit")
+public class AddProduitServlet extends HttpServlet {
+    private static final produitMetier metier = produitMetierImpl.getInstance();
+
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+                          throws ServletException, IOException {
+        String nom         = request.getParameter("nom");
+        String description = request.getParameter("description");
+        Double prix        = Double.parseDouble(request.getParameter("prix"));
+        Produit p = new Produit(nom, description, prix);
+        metier.addProduit(p);
+        request.setAttribute("listeProduits", metier.getAllProduits());
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    }
+}
+\end{lstlisting}
+
+\subsection{DeleteProduitServlet.java}
+
+Reçoit l'identifiant du produit via un paramètre GET dans l'URL (\texttt{?id=X}), supprime le produit, puis redirige vers \texttt{listProduits} pour recharger la liste à jour.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/DeleteProduitServlet.java]
+@WebServlet("/deleteProduit")
+public class DeleteProduitServlet extends HttpServlet {
+    private static final produitMetier metier = produitMetierImpl.getInstance();
+
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+                         throws ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("id"));
+        metier.deleteProduit(id);
+        response.sendRedirect("listProduits");
+    }
+}
+\end{lstlisting}
+
+\subsection{EditProduitServlet.java}
+
+Prépare l'écran de modification : elle charge le produit à éditer et le place dans la requête sous l'attribut \texttt{produitEdit}. La JSP \texttt{index.jsp} détecte ensuite cet attribut pour pré-remplir les champs du formulaire.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/EditProduitServlet.java]
+@WebServlet("/editProduit")
+public class EditProduitServlet extends HttpServlet {
+    private static final produitMetier metier = produitMetierImpl.getInstance();
+
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+                         throws ServletException, IOException {
+        Long id = Long.parseLong(request.getParameter("id"));
+        Produit p = metier.getProduitById(id);
+        request.setAttribute("produitEdit", p);
+        request.setAttribute("listeProduits", metier.getAllProduits());
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    }
+}
+\end{lstlisting}
+
+\subsection{UpdateProduitServlet.java}
+
+Reçoit les nouvelles valeurs via le formulaire POST, reconstruit un objet \texttt{Produit} avec les données modifiées, et demande au service de procéder à la mise à jour dans la liste.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/UpdateProduitServlet.java]
+@WebServlet("/updateProduit")
+public class UpdateProduitServlet extends HttpServlet {
+    private static produitMetierImpl metier = produitMetierImpl.getInstance();
+
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+                          throws ServletException, IOException {
+        Long id          = Long.parseLong(request.getParameter("idProduit"));
+        String nom       = request.getParameter("nom");
+        String desc      = request.getParameter("description");
+        Double prix      = Double.parseDouble(request.getParameter("prix"));
+        Produit p = new Produit();
+        p.setIdProduit(id);
+        p.setNom(nom);
+        p.setDescription(desc);
+        p.setPrix(prix);
+        metier.updateProduit(p);
+        request.setAttribute("listeProduits", metier.getAllProduits());
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    }
+}
+\end{lstlisting}
+
+\subsection{ListProduitServlet.java -- Le Dispatcher Central}
+
+C'est la servlet la plus importante. En plus de charger la liste des produits, elle joue le rôle de \textbf{dispatcher par rôle} : après avoir récupéré l'objet \texttt{user} depuis la session, elle redirige l'administrateur vers \texttt{index.jsp} (interface complète) et l'utilisateur simple vers \texttt{list.jsp} (lecture seule).
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/ListProduitServlet.java (extrait doGet)]
+protected void doGet(HttpServletRequest request,
+                     HttpServletResponse response)
+                     throws ServletException, IOException {
+    String idProduit = request.getParameter("idProduit");
+    List<Produit> liste = new ArrayList<>();
+
+    if (idProduit != null && !idProduit.isEmpty()) {
+        try {
+            Long id = Long.parseLong(idProduit);
+            Produit p = metier.getProduitById(id);
+            if (p != null) liste.add(p);
+        } catch (NumberFormatException e) {
+            liste = metier.getAllProduits();
+        }
+    } else {
+        liste = metier.getAllProduits();
+    }
+
+    request.setAttribute("listeProduits", liste);
+
+    // Dispatch selon le role de l'utilisateur connecte
+    HttpSession session = request.getSession(false);
+    user u = (user) session.getAttribute("user");
+
+    if (u != null && "admin".equals(u.getRole())) {
+        request.getRequestDispatcher("index.jsp").forward(request, response);
+    } else {
+        request.getRequestDispatcher("list.jsp").forward(request, response);
+    }
+}
+\end{lstlisting}
+
+% =============================================
+\section{Authentification -- loginServlet et logoutServlet}
+% =============================================
+
+\subsection{loginServlet.java}
+
+La servlet de connexion expose deux comportements : en GET, elle affiche le formulaire via un \texttt{forward} vers \texttt{login.jsp}. En POST, elle vérifie les identifiants via le \texttt{userDAO}. Si la vérification réussit, l'objet \texttt{user} est stocké en session sous la clé \texttt{"user"}, puis l'utilisateur est redirigé vers \texttt{listProduits} (qui se chargera de l'orienter selon son rôle).
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/loginServlet.java]
+@WebServlet("/login")
+public class loginServlet extends HttpServlet {
+    private userDAO dao = new userDAO();
+
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+                         throws ServletException, IOException {
+        request.getRequestDispatcher("login.jsp").forward(request, response);
+    }
+
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+                          throws ServletException, IOException {
+        String login    = request.getParameter("login");
+        String password = request.getParameter("password");
+        user u = dao.findByLoginAndPassword(login, password);
+        if (u != null) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", u);
+            if ("admin".equals(u.getRole())) {
+                response.sendRedirect("listProduits");
+            } else {
+                response.sendRedirect("listProduits");
+            }
+        } else {
+            request.setAttribute("error", "login or pwd is incorrect");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Points clés :}
+\begin{itemize}
+    \item \texttt{request.getSession()} crée une session HTTP et lui associe le cookie \texttt{JSESSIONID} côté navigateur.
+    \item La structure \texttt{if/else} sur le rôle est maintenue pour montrer explicitement la gestion différenciée, même si les deux branches redirigent vers \texttt{listProduits} qui dispatche lui-même.
+    \item En cas d'échec, \texttt{forward} est utilisé (et non \texttt{redirect}) pour que l'attribut \texttt{"error"} reste accessible dans la JSP.
+\end{itemize}
+
+\subsection{logoutServlet.java}
+
+La déconnexion consiste à invalider la session active. \texttt{getSession(false)} est utilisé explicitement pour ne \emph{pas} créer une nouvelle session si aucune n'existe -- ce qui serait logiquement contradictoire lors d'une déconnexion.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=web/logoutServlet.java]
+@WebServlet("/logout")
+public class logoutServlet extends HttpServlet {
+
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+                         throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        response.sendRedirect("login");
+    }
+}
+\end{lstlisting}
+
+% =============================================
+\section{Sécurité -- Le Filtre d'Authentification}
+% =============================================
+
+\subsection{AuthFilter.java}
+
+Le filtre est le gardien de toutes les URLs protégées. Conformément au cours (Chapitre 2, page 272), il intercepte chaque requête vers les servlets de gestion de produits et vérifie la présence d'un attribut \texttt{"user"} en session. Sans lui, un utilisateur pourrait accéder directement aux URLs sans passer par la page de connexion.
+
+Le filtre est déclaré dans \texttt{web.xml} (voir section suivante) plutôt qu'avec une annotation, pour centraliser la configuration de sécurité dans le descripteur de déploiement.
+
+\begin{lstlisting}[language=Java, style=javastyle, caption=filter/AuthFilter.java]
+package filter;
+
+public class AuthFilter extends HttpFilter implements Filter {
+
+    public void doFilter(ServletRequest req, ServletResponse resp,
+                         FilterChain chain)
+                         throws IOException, ServletException {
+        HttpServletRequest  request  = (HttpServletRequest)  req;
+        HttpServletResponse response = (HttpServletResponse) resp;
+        HttpSession session = request.getSession(false);
+
+        if (session != null && session.getAttribute("user") != null) {
+            chain.doFilter(req, resp); // Session valide : on laisse passer
+        } else {
+            // Pas de session : redirection vers la page de login
+            response.sendRedirect(request.getContextPath() + "/login");
+        }
+    }
+
+    public void init(FilterConfig fConfig) throws ServletException {}
+    public void destroy() {}
+}
+\end{lstlisting}
+
+\textbf{Explications des points essentiels :}
+\begin{itemize}
+    \item \texttt{req} et \texttt{resp} sont de type générique \texttt{ServletRequest/Response}. Le \textbf{cast} vers \texttt{HttpServletRequest/Response} est obligatoire pour pouvoir appeler \texttt{getSession()} et \texttt{sendRedirect()}, qui sont des méthodes spécifiques au protocole HTTP.
+    \item \texttt{getSession(false)} ne crée jamais de nouvelle session. Si aucune session n'existe, il retourne \texttt{null} -- ce que l'on teste immédiatement.
+    \item \texttt{chain.doFilter(req, resp)} passe le relais soit au prochain filtre de la chaîne, soit directement à la servlet cible. Ne pas appeler cette méthode bloque définitivement la requête.
+    \item \texttt{getContextPath()} retourne le nom du contexte de déploiement (\texttt{/GestionDesProduitsMVC1}), indispensable pour construire une URL de redirection absolue correcte.
+\end{itemize}
+
+% =============================================
+\section{Couche Vue -- Les Pages JSP}
+% =============================================
+
+\subsection{login.jsp -- Le Formulaire de Connexion}
+
+La page de login n'utilise pas de JSTL mais un scriptlet Java classique pour afficher le message d'erreur. L'attribut \texttt{"error"} est placé dans la requête par \texttt{loginServlet} en cas d'échec d'authentification.
+
+\begin{lstlisting}[style=jspstyle, caption=webapp/login.jsp]
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head><title>Login</title></head>
+<body>
+<h2>Login</h2>
+
+<% String erreur = (String) request.getAttribute("error");
+   if (erreur != null) { %>
+    <p style="color:red;"><%= erreur %></p>
+<% } %>
+
+<form action="login" method="post">
+    Login: <input type="text" name="login" required /><br/>
+    Mot de passe: <input type="password" name="password" required /><br/>
+    <input type="submit" value="Se connecter" />
+</form>
+</body>
+</html>
+\end{lstlisting}
+
+\subsection{index.jsp -- La Vue Administrateur (CRUD Complet)}
+
+C'est la vue principale de l'administrateur. Elle intègre un formulaire \textbf{à double rôle} grâce à un opérateur ternaire EL : si l'attribut \texttt{produitEdit} est présent (i.e., on est en mode édition), le formulaire soumet vers \texttt{updateProduit} avec le bouton "Modifier" ; sinon il soumet vers \texttt{addProduit} avec le bouton "Ajouter". La page affiche aussi le login de l'utilisateur connecté et un lien de déconnexion.
+
+\begin{lstlisting}[style=jspstyle, caption=webapp/index.jsp]
+<%@ page contentType="text/html;charset=UTF-8" language="java"
+         errorPage="error.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>Gestion des Produits MVC1</title></head>
+<body>
+<h2>Gestion des Produits (MVC1)</h2>
+<p>Bienvenue, ${user.login} | <a href="logout">Deconnexion</a></p>
+
+<form action="${produitEdit != null ? 'updateProduit' : 'addProduit'}"
+      method="post">
+    <input type="hidden" name="idProduit"
+           value="${produitEdit.idProduit}" />
+    Nom: <input type="text" name="nom"
+                value="${produitEdit.nom}" required />
+    Description: <input type="text" name="description"
+                        value="${produitEdit.description}" required />
+    Prix: <input type="text" name="prix"
+                 value="${produitEdit.prix}" required />
+    <input type="submit"
+           value="${produitEdit != null ? 'Modifier' : 'Ajouter'}" />
+</form>
+<hr/>
+<form action="listProduits" method="get">
+    ID: <input type="text" name="idProduit" />
+    <input type="submit" value="Rechercher" />
+</form>
+<hr/>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th><th>Nom</th><th>Description</th><th>Prix</th><th>Actions</th>
+    </tr>
+    <c:forEach var="p" items="${listeProduits}">
+        <tr>
+            <td>${p.idProduit}</td>
+            <td>${p.nom}</td>
+            <td>${p.description}</td>
+            <td>${p.prix}</td>
+            <td>
+                <a href="editProduit?id=${p.idProduit}">Modifier</a> |
+                <a href="deleteProduit?id=${p.idProduit}"
+                   onclick="return confirm('Supprimer ?');">
+                   Supprimer
+                </a>
+            </td>
+        </tr>
+    </c:forEach>
+</table>
+</body>
+</html>
+\end{lstlisting}
+
+\subsection{list.jsp -- La Vue Utilisateur (Lecture Seule)}
+
+Cette vue est strictement réservée aux utilisateurs avec le rôle \texttt{"user"}. Aucun formulaire d'ajout, aucun lien de modification ou de suppression n'y est présent. Elle affiche uniquement la liste en lecture seule.
+
+\begin{lstlisting}[style=jspstyle, caption=webapp/list.jsp]
+<%@ page contentType="text/html;charset=UTF-8" language="java"
+         errorPage="error.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>Liste des Produits</title></head>
+<body>
+<h2>Liste des Produits</h2>
+<p>Bienvenue, ${user.login} | <a href="logout">Deconnexion</a></p>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th><th>Nom</th><th>Description</th><th>Prix</th>
+    </tr>
+    <c:forEach var="p" items="${listeProduits}">
+        <tr>
+            <td>${p.idProduit}</td>
+            <td>${p.nom}</td>
+            <td>${p.description}</td>
+            <td>${p.prix}</td>
+        </tr>
+    </c:forEach>
+</table>
+</body>
+</html>
+\end{lstlisting}
+
+\subsection{error.jsp -- La Page d'Erreur Centralisée}
+
+La directive \texttt{isErrorPage="true"} donne à cette JSP l'accès à la variable implicite \texttt{exception}, disponible uniquement dans les pages d'erreur. La directive \texttt{errorPage="error.jsp"} présente dans \texttt{index.jsp} et \texttt{list.jsp} désigne cette page comme destination en cas d'exception non capturée.
+
+\begin{lstlisting}[style=jspstyle, caption=webapp/error.jsp]
+<%@ page contentType="text/html;charset=UTF-8" language="java"
+         isErrorPage="true" %>
+<html>
+<head><title>Erreur</title></head>
+<body>
+<h2>Une erreur est survenue</h2>
+<p style="color:red;"><%= exception.getMessage() %></p>
+<a href="listProduits">Retour a la liste</a>
+</body>
+</html>
+\end{lstlisting}
+
+% =============================================
+\section{Configuration -- web.xml}
+% =============================================
+
+Le fichier \texttt{web.xml} contient trois éléments de configuration clés que les annotations ne peuvent pas gérer directement :
+
+\begin{enumerate}
+    \item \textbf{Welcome file} : redirige l'accès à la racine du projet vers \texttt{login}.
+    \item \textbf{Error pages} : capture les erreurs HTTP 404 et 500 pour afficher \texttt{error.jsp} plutôt que la page d'erreur par défaut de Tomcat.
+    \item \textbf{Filtre} : enregistre \texttt{AuthFilter} et définit les URLs qu'il doit protéger.
+\end{enumerate}
+
+\begin{lstlisting}[style=xmlstyle, caption=WEB-INF/web.xml]
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app ...>
+    <display-name>GestionDesProduitsMVC1</display-name>
+
+    <welcome-file-list>
+        <welcome-file>login</welcome-file>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.jsp</location>
+    </error-page>
+
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/listProduits</url-pattern>
+        <url-pattern>/addProduit</url-pattern>
+        <url-pattern>/deleteProduit</url-pattern>
+        <url-pattern>/editProduit</url-pattern>
+        <url-pattern>/updateProduit</url-pattern>
+        <url-pattern>/index.jsp</url-pattern>
+        <url-pattern>/list.jsp</url-pattern>
+    </filter-mapping>
+</web-app>
+\end{lstlisting}
+
+% =============================================
+\section{Conclusion}
+% =============================================
+
+Ce projet illustre de manière concrète le fonctionnement de l'architecture MVC1 dans un contexte Java EE. Chaque couche a un rôle bien défini : le DAO gère l'accès aux données, le service assure la logique métier via un Singleton, les servlets traitent les requêtes HTTP et les vues JSP/JSTL affichent les résultats sans code Java superflu.
+
+L'ajout de l'authentification et de la gestion des rôles pour le TP4 a permis de mettre en pratique deux mécanismes fondamentaux supplémentaires : les sessions HTTP pour maintenir l'état de connexion entre les requêtes, et les filtres de servlets pour protéger les ressources de manière centralisée et transparente -- exactement comme le recommande le Chapitre 2 du cours.
+
+\end{document}
